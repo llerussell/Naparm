@@ -1,10 +1,10 @@
-function [x,y,normImg] = MariusCellFinder(orig_Im)
+function [x,y,normImg] = MariusCellFinder(orig_Im, model)
 % LR 2016
 % Modified HD's CellFinder_3D
 % Uses Marius Pachitariu's static cell-detection algorithm
 
 % pre-learned model parameters. model.W contains the templates.
-x = load('C1V1_1_34x_512_model');
+x = load(model);
 
 % If ops.Nextract = 0, the model is calibrated to extract the number of cells it thinks are
 % present in the image. If ops.Nextract>0, it extracts exactly that many

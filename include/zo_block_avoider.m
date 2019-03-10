@@ -119,9 +119,9 @@ if translate
     zo_block(zo_idcs_trans) = hotpix;
     
     blocked = targ_im & zo_block;
+    blocked = 1;
     
     if max(blocked(:))
-        
         dtarg_im = double(targ_im);
         
         distfromspots = bwdist(dtarg_im);
@@ -140,16 +140,51 @@ if translate
         
         [avoided_y,avoided_x] = ind2sub(dimensions,farcents(minidx));
         
+
+        % make sure the translated targets are not outside of slm space (max coord is 256)
+        trans_x = targ_subs(:,2) - avoided_x;
+        trans_y = targ_subs(:,1) - avoided_y;
+        max_dist = max([abs(trans_x); abs(trans_y)]);
+%         keyboard
+        if max_dist > 255
+            disp('Translated target(s) outside of SLM space, repositioning zero order')
+            maxXYoffset = [];
+            for i = 1:numel(farcents)
+                [y,x] = ind2sub(dimensions,farcents(i));
+                trans_x = targ_subs(:,2) - x;
+                trans_y = targ_subs(:,1) - y;
+                maxXYoffset(i) = max([abs(trans_x); abs(trans_y)]);
+%                 maxdists(i) = max(abs(pairwiseDistance([x y], [targ_subs(:,2) targ_subs(:,1)])));
+            end
+            farcents(maxXYoffset>256) = [];
+            img = nan(512, 512);
+            img(farcents) = distfromcent(farcents);
+            goodindices = find(~isnan(img));
+            if isempty(goodindices)
+                disp('Not possible :(')
+            end
+            gooddists = distfromcent(goodindices);
+            [~,mindist] = min(gooddists);
+            minidx = goodindices(mindist);
+            [avoided_y,avoided_x] = ind2sub(dimensions,minidx);
+            
+            if isempty(goodindices) % failed to fix
+                farcents = find(distfromspots>=zo_width*1.5);
+                [~,minidx] = min(distfromcent(farcents));
+                [avoided_y,avoided_x] = ind2sub(dimensions,farcents(minidx));
+            end
+        end
+        
+
+        
         avoid_shift = trans_centre - [avoided_y avoided_x];
-        
         targ_cntr = [avoided_y avoided_x];
-        
         translation = translation - avoid_shift;
-       
+%        keyboard
     end
     
     targ_subs = targ_subs - repmat(translation,size(targ_subs,1),1); 
-    
+    targ_subs(targ_subs==0) = 1;
     cntr = targ_cntr;
 
 else
