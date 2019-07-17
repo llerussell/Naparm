@@ -19,4 +19,4 @@ This software will generate SLM phase masks, galvanometer positioning and Pockel
 * [TriggerBuilder](https://github.com/llerussell/TriggerBuilder) - to interface with [PackIO](http://apacker83.github.io/)
 
 ## As seen in
-Russell LE, Yang Z, Tan LP, Fisek M, Packer AM, Dalgleish HWP, Chettih S, Harvey CD, Hausser M. [The influence of visual cortex on perception is modulated by behavioural state.](https://doi.org/10.1101/706010v1) bioRxiv 17 July 2019. 
+Russell LE, Yang Z, Tan LP, Fisek M, Packer AM, Dalgleish HWP, Chettih S, Harvey CD, Hausser M. [The influence of visual cortex on perception is modulated by behavioural state.](https://www.biorxiv.org/content/10.1101/706010v1) bioRxiv 17 July 2019. 
