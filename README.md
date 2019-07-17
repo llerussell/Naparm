@@ -11,6 +11,4 @@ This software will generate SLM phase masks, galvanometer positioning and Pockel
 ![Imgur](https://i.imgur.com/tSSsMGR.jpg)
 
 ## Example
-<img src="/misc/ani.gif" alt="alt text">
-
-<img src="/misc/NAPARMGIF.gif" alt="alt text" width="430" height="430"> <img src="https://i.imgur.com/rwMmW1p.png" alt="alt text" width="430" height="430">
+<img src="/misc/NaparmAnimation_small.gif" alt="Animation of Naparm results">
