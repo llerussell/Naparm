@@ -12,3 +12,6 @@ This software will generate SLM phase masks, galvanometer positioning and Pockel
 
 ## Example
 <img src="/misc/NaparmAnimation_reduced.gif" alt="Animation of Naparm results">
+
+## As seen in
+Russell LE, Yang Z, Tan LP, Fisek M, Packer AM, Dalgleish HWP, Chettih S, Harvey CD, Hausser M. [The influence of visual cortex on perception is modulated by behavioural state.](https://doi.org/10.1101/706010) bioRxiv 17 July 2019. 
