@@ -187,11 +187,12 @@ handles.PreviewPhaseMask_Ax.Title.FontSize = 10;
 
 % configure uitable
 jscrollpane = findjobj(handles.PointsTable);
-jtable = jscrollpane.getViewport.getView;
-jtable.setSortable(true);		% or: set(jtable,'Sortable','on');
-jtable.setAutoResort(true);
-jtable.setMultiColumnSortable(true);
-jtable.setPreserveSelectionsAfterSorting(true);
+% jscrollpane
+% jtable = jscrollpane.getViewport.getView;
+% jtable.setSortable(true);		% or: set(jtable,'Sortable','on');
+% jtable.setAutoResort(true);
+% jtable.setMultiColumnSortable(true);
+% jtable.setPreserveSelectionsAfterSorting(true);
 
 
 % add parameters to handles structure
@@ -493,6 +494,8 @@ function changeImage(handles)
 index = handles.SelectImage_Popup.Value;
 
 img = handles.allImagesProcessed{index};
+allImg = handles.allImagesProcessed{:};
+allImg = allImg(:);
 
 % take just one frame if multiple frames
 if numel(handles.allImageShapes{index}) > 2
@@ -504,7 +507,7 @@ if numel(handles.allImageShapes{index}) > 2
 end
 
 % update the data
-handles.imageDisplay.CData = imadjust(img, stretchlim(img, [0.001 0.999]));
+handles.imageDisplay.CData = imadjust(img, stretchlim(allImg, [0.001 .999]));
 % handles.imageDisplay.CData = img;
 
 % adjust axes limits
@@ -1213,13 +1216,16 @@ function [x,y] = FindLocalMaxima(img, r)
 thresh = r;
 editedImg = img;
 
-editedImg = medfilt2(editedImg,[4 4]);
+editedImg = medfilt2(editedImg,[1 1]);
 B = imregionalmax(editedImg,8);
 allPeaks = find(B);
 allVals = editedImg(allPeaks);
 goodPeaks = allVals >= thresh;
 [y,x] = ind2sub([512,512],allPeaks(goodPeaks));
- 
+y = y-1;
+x = x-1;
+
+
 % remove edges
 toRemove = (x==1 | x==512 | y==1 | y==512);
 x(toRemove) = [];
@@ -1381,6 +1387,20 @@ img = handles.allImagesProcessed{index};
 editedImg = img;
 
 
+
+if numel(size(img))>3  % means colour img
+    for c = 1:3
+    % apply filterlocal
+% editedImg = wiener2(img, [5 5]);
+orig = img(:,:,handles.CurrentZPlane,c);
+temp = medfilt2(orig,[3,3]);
+temp = orig - temp;
+temp = orig - temp;
+% temp = temp .* orig;
+
+editedImg(:,:,handles.CurrentZPlane,c) = temp;
+    end
+else
 % apply filterlocal
 % editedImg = wiener2(img, [5 5]);
 orig = img(:,:,handles.CurrentZPlane);
@@ -1390,7 +1410,7 @@ temp = orig - temp;
 % temp = temp .* orig;
 
 editedImg(:,:,handles.CurrentZPlane) = temp;
-
+end
 % save the edited image
 handles.allImagesProcessed{index} = editedImg;
 guidata(handles.output, handles)
@@ -1965,6 +1985,7 @@ function ExportAll_Pushbutton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+
 % Set up directories
 % auto increment expt number
 contents = dir([handles.data.Path filesep handles.ExperimentName_Edit.String '*']);
@@ -1982,6 +2003,8 @@ handles.ExperimentNum_Edit.String = num2str(Iter);
 handles.data.ExperimentIdentifier = [handles.ExperimentName_Edit.String '_' num2str(Iter, '%03d')];
 NaparmDirectory = [handles.data.Path filesep handles.data.ExperimentIdentifier];
 handles.data.NaparmDirectory = NaparmDirectory;
+
+disp(['Saving to: ' NaparmDirectory ' ...'])
 
 mkdir([NaparmDirectory filesep 'Images'])
 mkdir([NaparmDirectory filesep 'Targets'])
@@ -2172,6 +2195,7 @@ MarkPoints_GPLMaker(X, Y, IsSpiral, SpiralDiameterUm, SpiralRevolutions, SaveNam
 function MakeMarkPointsXML(handles)
 SaveName        = [handles.data.NaparmDirectory filesep handles.data.ExperimentIdentifier];
 NumGroups       = numel(unique(handles.points.Group));
+NumCellsPerGroup = histc(handles.points.Group, unique(handles.points.Group));
 SequenceRepetitions = str2double(handles.SequenceRepetitions_Edit.String);
 NumRows         = NumGroups * SequenceRepetitions;
 ShotsPerPattern = str2double(handles.ShotsPerPattern_Edit.String);
@@ -2217,6 +2241,12 @@ for p = 1:NumRows
     Points{p} = ['Point ' num2str(PointNums(p))];
 end
 
+Powers = [];
+for p = 1:NumRows
+    Powers(p) = NumCellsPerGroup(Indices(p)) * str2double(handles.LaserPowerMW_Edit.String);
+    Powers(p) = round(mw2pv(Powers(p)));
+end
+
 Name = [...
     num2str(NumGroups) 'Patterns_' ...
     num2str(SequenceRepetitions) 'Repeats_x'...
@@ -2230,7 +2260,7 @@ MarkPoints_XMLMaker(...
     'NumRows', NumRows, ...
     'AddDummy', AddDummy, ...
     'UncagingLaser', LaserName,...
-    'UncagingLaserPower', LaserPowerPV, ...
+    'UncagingLaserPower', Powers, ...
     'InternalIterations',SequenceRepetitions, ...
     'Repetitions', ShotsPerPattern, ...
     'InitialDelay', InitialDelay, ...
@@ -2880,6 +2910,52 @@ FilePath = [PathName filesep FileName];
 Loaded = load(FilePath);
 
 CurrentNumPoints = handles.points.Counter;
+
+if isfield(Loaded, 'software')
+    if strcmpi(Loaded.software, 'cellpose')
+        % process the cellpose masks here...
+        nplanes = size(Loaded.masks,1);
+        
+        Loaded.points.X = [];
+        Loaded.points.Y = [];
+        Loaded.points.Z = [];
+        Loaded.points.Zum = [];
+        Loaded.points.Idx = [];
+        Loaded.points.Img = [];
+        Loaded.points.Group = [];
+        Loaded.points.GroupCentroidX = [];
+        Loaded.points.GroupCentroidY = [];
+        Loaded.points.Weight = [];
+        Loaded.points.OffsetX = [];
+        Loaded.points.OffsetY = [];
+
+        for p = 1:nplanes
+            masks_p = double(squeeze(Loaded.masks(p,:,:)));
+            numFound = max(masks_p(:));
+            for m = 1:numFound
+                tempInd = find(masks_p==m);
+                [tempIndY, tempIndX] = ind2sub(size(masks_p), tempInd);
+                Loaded.points.X = [Loaded.points.X median(tempIndX)];
+                Loaded.points.Y = [Loaded.points.Y median(tempIndY)];
+                Loaded.points.Z = [Loaded.points.Z p];
+            end
+        end
+        Loaded.points.Zum = nan(size(Loaded.points.Z));
+        Loaded.points.Idx = 1:numel(Loaded.points.Z);
+        Loaded.points.Img = Loaded.points.Z;
+        Loaded.points.Group = nan(size(Loaded.points.Z));
+        Loaded.points.GroupCentroidX = nan(size(Loaded.points.Z));
+        Loaded.points.GroupCentroidY = nan(size(Loaded.points.Z));
+        Loaded.points.Weight = nan(size(Loaded.points.Z));
+        Loaded.points.OffsetX = nan(size(Loaded.points.Z));
+        Loaded.points.OffsetY = nan(size(Loaded.points.Z));
+        
+        
+    else
+        disp('Unknown!')
+    end
+end
+
 AddPoint(Loaded.points.X', Loaded.points.Y', handles)
 
 % refresh handles
@@ -2889,7 +2965,7 @@ handles.points.OffsetX(CurrentNumPoints+1:end) = Loaded.points.OffsetX;
 handles.points.OffsetY(CurrentNumPoints+1:end) = Loaded.points.OffsetY;
 handles.points.Z(CurrentNumPoints+1:end) = Loaded.points.Z;
 handles.points.Zum(CurrentNumPoints+1:end) = Loaded.points.Zum;
-handles.points.Idx(CurrentNumPoints+1:end) = Loaded.points.Idx;
+handles.points.Idx(CurrentNumPoints+1:end) = CurrentNumPoints + Loaded.points.Idx;
 handles.points.Img(CurrentNumPoints+1:end) = Loaded.points.Img;
 handles.points.Group(CurrentNumPoints+1:end) = Loaded.points.Group;
 handles.points.GroupCentroidX(CurrentNumPoints+1:end) = Loaded.points.GroupCentroidX;
