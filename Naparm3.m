@@ -20,7 +20,7 @@ function varargout = Naparm3(varargin)
 % * Group only within a plane
 
 
-% Last Modified by GUIDE v2.5 27-Jun-2018 15:04:04
+% Last Modified by GUIDE v2.5 27-Jul-2020 18:02:05
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -89,12 +89,13 @@ hold(handles.ImageAx, 'on')
 handles.ImageAx.Clipping = 'off';
 
 % add image plot
-StartSize = 512;
-handles.imageDisplay = imshow(zeros(StartSize,StartSize), [0 1], 'Parent',handles.ImageAx);
-handles.imageDisplay.XData = [0 StartSize-1];
-handles.imageDisplay.YData = [0 StartSize-1];
-handles.ImageAx.XLim = [0 StartSize] - 0.5;
-handles.ImageAx.YLim = [0 StartSize] - 0.5;
+handles.fovSize = [512 512]; % HWPD, NB this is YX (i.e. rows,columns)
+handles.fovCntr = handles.fovSize/2;
+handles.imageDisplay = imshow(zeros(handles.fovSize(1),handles.fovSize(2)), [0 1], 'Parent',handles.ImageAx);
+handles.imageDisplay.XData = [0 handles.fovSize(1)-1];
+handles.imageDisplay.YData = [0 handles.fovSize(2)-1];
+handles.ImageAx.XLim = [0 handles.fovSize(1)] - 0.5;
+handles.ImageAx.YLim = [0 handles.fovSize(2)] - 0.5;
 
 % add border around image plot
 XLim = handles.ImageAx.XLim;
@@ -130,8 +131,8 @@ handles.AllTrialsTimingPlotSpiralTriggers = plot(0,0, 'k', 'Parent',handles.AllT
 
 
 % configure preview axes
-im = imshow(ones(512,512), 'Parent',handles.PreviewFOVTargets_Ax);
-im.AlphaData = nan(512,512);
+im = imshow(ones(handles.fovSize(1),handles.fovSize(2)), 'Parent',handles.PreviewFOVTargets_Ax);
+im.AlphaData = nan(handles.fovSize(1),handles.fovSize(2));
 hold(handles.PreviewFOVTargets_Ax, 'on')
 handles.PreviewFOVTargetsALL_Scatter = scatter3(nan,nan,nan, 10, 'filled', 'Parent',handles.PreviewFOVTargets_Ax);
 handles.PreviewFOVTargets_Scatter = plot3(nan,nan,nan, 'k.', 'markersize',20, 'Parent',handles.PreviewFOVTargets_Ax);
@@ -139,8 +140,8 @@ handles.PreviewFOVTargetsALL_Scatter.MarkerFaceColor = [.8 .8 .8];
 handles.PreviewFOVTargetsALL_Scatter.MarkerFaceAlpha  = 0.5;
 uistack(handles.PreviewFOVTargetsALL_Scatter,'bottom');
 uistack(handles.PreviewFOVTargets_Scatter,'top');
-handles.PreviewFOVTargets_Ax.XLim = [0,511];
-handles.PreviewFOVTargets_Ax.YLim = [0,511];
+handles.PreviewFOVTargets_Ax.XLim = [0,handles.fovSize(2)-1];
+handles.PreviewFOVTargets_Ax.YLim = [0,handles.fovSize(1)-1];
 handles.PreviewFOVTargets_Ax.Visible = 'on';
 handles.PreviewFOVTargets_Ax.XTick = [];
 handles.PreviewFOVTargets_Ax.YTick = [];
@@ -148,13 +149,14 @@ handles.PreviewFOVTargets_Ax.ZTick = [];
 handles.PreviewFOVTargets_Ax.Title.String = 'FOV';
 handles.PreviewFOVTargets_Ax.Title.FontSize = 10;
 
-im = imshow(ones(512,512), 'Parent',handles.PreviewFOVGalvo_Ax);
-im.AlphaData = nan(512,512);
+
+im = imshow(ones(handles.fovSize(1),handles.fovSize(2)), 'Parent',handles.PreviewFOVGalvo_Ax);
+im.AlphaData = nan(handles.fovSize(1),handles.fovSize(2));
 hold(handles.PreviewFOVGalvo_Ax, 'on')
 handles.PreviewFOVGalvoALL_Scatter = plot(nan,nan, 's', 'color',[.7 .7 .7], 'Parent',handles.PreviewFOVGalvo_Ax);
 handles.PreviewFOVGalvo_Scatter = plot(nan,nan, 'ks', 'Parent',handles.PreviewFOVGalvo_Ax);
-handles.PreviewFOVGalvo_Ax.XLim = [0,511];
-handles.PreviewFOVGalvo_Ax.YLim = [0,511];
+handles.PreviewFOVGalvo_Ax.XLim = [0,handles.fovSize(2)-1];
+handles.PreviewFOVGalvo_Ax.YLim = [0,handles.fovSize(1)-1];
 handles.PreviewFOVGalvo_Ax.Visible = 'on';
 handles.PreviewFOVGalvo_Ax.XTick = [];
 handles.PreviewFOVGalvo_Ax.YTick = [];
@@ -163,13 +165,13 @@ handles.PreviewFOVGalvo_Ax.Title.String = 'Galvo offset';
 handles.PreviewFOVGalvo_Ax.Title.FontSize = 10;
 
 handles.PreviewSLMTargets_Ax.Color = [0 0 0];
-im = imshow(ones(512,512), 'Parent',handles.PreviewSLMTargets_Ax);
-im.AlphaData = nan(512,512);
+im = imshow(ones(handles.fovSize(1),handles.fovSize(2)), 'Parent',handles.PreviewSLMTargets_Ax);
+im.AlphaData = nan(handles.fovSize(1),handles.fovSize(2));
 hold(handles.PreviewSLMTargets_Ax, 'on')
-handles.PreviewSLMZO_Scatter = plot3(256,256,0, 'w+', 'color',[.5 .5 .5], 'markersize',12, 'Parent',handles.PreviewSLMTargets_Ax);
+handles.PreviewSLMZO_Scatter = plot3(handles.fovCntr(2),handles.fovCntr(1),0, 'w+', 'color',[.5 .5 .5], 'markersize',12, 'Parent',handles.PreviewSLMTargets_Ax);
 handles.PreviewSLMTargets_Scatter = plot3(nan,nan,0, 'w.', 'markersize',10, 'Parent',handles.PreviewSLMTargets_Ax);
-handles.PreviewSLMTargets_Ax.XLim = [0,511];
-handles.PreviewSLMTargets_Ax.YLim = [0,511];
+handles.PreviewSLMTargets_Ax.XLim = [0,handles.fovSize(2)-1];
+handles.PreviewSLMTargets_Ax.YLim = [0,handles.fovSize(1)-1];
 handles.PreviewSLMTargets_Ax.Visible = 'on';
 handles.PreviewSLMTargets_Ax.XTick = [];
 handles.PreviewSLMTargets_Ax.YTick = [];
@@ -177,7 +179,7 @@ handles.PreviewSLMTargets_Ax.ZTick = [];
 handles.PreviewSLMTargets_Ax.Title.String = 'SLM targets';
 handles.PreviewSLMTargets_Ax.Title.FontSize = 10;
 
-handles.PreviewPhaseMask_Im = imshow(zeros(512,512), 'Parent',handles.PreviewPhaseMask_Ax);
+handles.PreviewPhaseMask_Im = imshow(zeros(handles.fovSize(1),handles.fovSize(2)), 'Parent',handles.PreviewPhaseMask_Ax);
 colormap(handles.PreviewPhaseMask_Ax, 'gray')
 handles.PreviewPhaseMask_Ax.Visible = 'on';
 handles.PreviewPhaseMask_Ax.XTick = [];
@@ -402,18 +404,32 @@ end
 % convert to double
 img = double(img);
 
+% normalise image
+img = normalise(img);
+
+% deal with imported images of different size
+if any(size(img(:,:,1)) ~= handles.fovSize)
+    % if first image, take this image size as default
+    if isempty(handles.allImageShapes)
+        handles.fovSize = size(img(:,:,1));
+        handles.fovCntr = handles.fovSize/2;
+        handles = resetAllImageSizes(handles);
+    % if different to previously imported images, resize this image
+    else
+        warning('Images are different sizes, image resized to match previous images')
+        img = imresize(img,handles.fovSize);
+    end
+end
+
+% get image dimensions
+handles.allImageShapes{end+1} = size(img);
+
 % update zlider max to number of frames/slices
 currentSliderMax = handles.ZPlane_slider.Max;
 handles.ZPlane_slider.Max = max([currentSliderMax size(img,3)]);
 numSlices = handles.ZPlane_slider.Max;
 handles.ZPlane_slider.SliderStep = [0 1/(numSlices-1)];
 handles.CurrentPlane_text.String = ['Plane ' num2str(handles.CurrentZPlane) ' of ' num2str(numSlices)];
-
-% normalise image
-img = normalise(img);
-
-% get image dimensions
-handles.allImageShapes{end+1} = size(img);
 
 % save raw image
 handles.allImagesRaw{end+1} = img;
@@ -464,7 +480,6 @@ handles.ExperimentNum_Edit.String = num2str(iter);
 
 
 
-
 % --- Executes on selection change in SelectImage_Popup.
 function handles = SelectImage_Popup_Callback(hObject, eventdata, handles)
 % hObject    handle to SelectImage_Popup (see GCBO)
@@ -487,8 +502,6 @@ ImgName = handles.SelectImage_Popup.String{index};
 changeImage(handles)
 
 
-
-
 function changeImage(handles)
 % get the image data
 index = handles.SelectImage_Popup.Value;
@@ -507,12 +520,13 @@ if numel(handles.allImageShapes{index}) > 2
 end
 
 % update the data
-handles.imageDisplay.CData = imadjust(img, stretchlim(allImg, [0.001 .999]));
+handles.imageDisplay.CData = imadjust(img, stretchlim(img, [0.001 .999]));
 % handles.imageDisplay.CData = img;
 
 % adjust axes limits
-% handles.imageDisplay.XData = [0 handles.allImageShapes{index}(1)-1];
-% handles.imageDisplay.YData = [0 handles.allImageShapes{index}(2)-1];
+% HWPD
+handles.imageDisplay.XData = [0 handles.allImageShapes{index}(1)] -1;
+handles.imageDisplay.YData = [0 handles.allImageShapes{index}(2)] -1;
 handles.ImageAx.XLim = [0 handles.allImageShapes{index}(1)] -0.5;
 handles.ImageAx.YLim = [0 handles.allImageShapes{index}(2)] -0.5;
 
@@ -520,6 +534,36 @@ handles.ImageAx.YLim = [0 handles.allImageShapes{index}(2)] -0.5;
 XLim = handles.ImageAx.XLim;
 YLim = handles.ImageAx.YLim;
 handles.ImageRect.Position = [XLim(1) YLim(1) XLim(2)-XLim(1) YLim(2)-XLim(1)];
+
+
+
+function handles = resetAllImageSizes(handles)
+% resets all image panes to have size of most recently imported image (if
+% it is different size to default [512,512] or to previously imported
+% images 
+
+% reset size of main image axis
+handles.imageDisplay.CData = zeros(handles.fovSize(1),handles.fovSize(2));
+handles.imageDisplay.XData = [0 handles.fovSize(1)-1];
+handles.imageDisplay.YData = [0 handles.fovSize(2)-1];
+handles.ImageAx.XLim = [0 handles.fovSize(1)] - 0.5;
+handles.ImageAx.YLim = [0 handles.fovSize(2)] - 0.5;
+
+% reset size of border around main image axis
+XLim = handles.ImageAx.XLim;
+YLim = handles.ImageAx.YLim;
+handles.ImageRect.Position = [XLim(1) YLim(1) XLim(2)-XLim(1) YLim(2)-YLim(1)];
+
+% % reset size of all preview axes
+% prevAxes = {'PreviewFOVTargets_Ax' 'PreviewFOVGalvo_Ax' ...
+%             'PreviewSLMTargets_Ax' 'PreviewPhaseMask_Ax'}; 
+% for a = 1:numel(prevAxes)
+%     handles.(prevAxes{a}).XLim = [0,handles.fovSize(2)-1];
+%     handles.(prevAxes{a}).YLim = [0,handles.fovSize(1)-1];
+%     im = findobj(handles.PreviewFOVGalvo_Ax,'Type','Image');
+%     im.CData = ones(handles.fovSize(1),handles.fovSize(2));
+%     im.AlphaData = nan(handles.fovSize(1),handles.fovSize(2));
+% end
 
 
 function img = normalise(img)
@@ -1215,19 +1259,20 @@ function [x,y] = FindLocalMaxima(img, r)
 
 thresh = r;
 editedImg = img;
+imSizeYX = size(img);
 
 editedImg = medfilt2(editedImg,[1 1]);
 B = imregionalmax(editedImg,8);
 allPeaks = find(B);
 allVals = editedImg(allPeaks);
 goodPeaks = allVals >= thresh;
-[y,x] = ind2sub([512,512],allPeaks(goodPeaks));
+[y,x] = ind2sub(imSizeYX,allPeaks(goodPeaks));
 y = y-1;
 x = x-1;
 
 
 % remove edges
-toRemove = (x==1 | x==512 | y==1 | y==512);
+toRemove = (x==1 | x==max(imSizeYX(2)) | y==1 | y==max(imSizeYX(1)));
 x(toRemove) = [];
 y(toRemove) = [];
 
@@ -1560,7 +1605,8 @@ function SaveCurrentImage_Callback(hObject, eventdata, handles)
 index = handles.SelectImage_Popup.Value;
 img = handles.allImagesProcessed{index};
 name = handles.SelectImage_Popup.String{index};
-imwrite(img, [name '_EDITED.tif']);
+%imwrite(img, [name '_EDITED.tif']); % HWPD 20200724
+TiffWriter(int16(img),[name '_EDITED.tif'],16); % HWPD 20200724
 
 
 % --- Executes on button press in CleanUpPoints_Pushbutton.
@@ -1628,7 +1674,15 @@ groupLUTindex = handles.GroupLUT_PopupMenu.Value;
 selectedCmap = handles.GroupLUT_PopupMenu.String{groupLUTindex};
 colours = eval([lower(selectedCmap) '(numGroups)']);
 
-pointColours = ones(handles.points.Counter,3);
+% pointColours = ones(handles.points.Counter,3);
+NewPointColour = lower(handles.NewPointColour_Edit.String);
+NewPointColour = strrep(NewPointColour,'[','');
+NewPointColour = strrep(NewPointColour,']','');
+NewPointColour = strsplit(NewPointColour, ',');
+NewPointColour = str2double(NewPointColour);
+
+pointColours = repmat(NewPointColour, handles.points.Counter,1);
+
 showAllPoints = handles.ShowAllPoints_checkbox.Value;
 if ~showAllPoints
     zIndices = handles.points.Z == handles.CurrentZPlane;
@@ -2013,10 +2067,8 @@ mkdir([NaparmDirectory filesep 'PhaseMasks' filesep 'InputTargets'])
 mkdir([NaparmDirectory filesep 'PhaseMasks' filesep 'TransformedTargets'])
 
 handles = MakeTargets(handles, true);
-handles = MakePhaseMasks(handles, true);
 SaveImages(handles);
-MakeMarkPointsGPL(handles);
-MakeMarkPointsXML(handles);
+handles = OutputConfigs(handles); % HWPD allows users to add their own outputs
 UpdateTimingPlot(hObject, eventdata, handles, true);
 SaveParameterFile(handles);
 SavePointsFile(handles)
@@ -2026,6 +2078,92 @@ disp(['Saved to: ' NaparmDirectory])
 ShowPreview(handles)
 
 handles.ExperimentNum_Edit.String = num2str(Iter+1);
+
+
+
+function handles = MakeTargets(handles, SaveResult)
+
+handles.points.Weight(isnan(handles.points.Weight)) = 1;
+blankImg = zeros(handles.fovSize(1),handles.fovSize(2));
+numGroups = numel(unique(handles.points.Group));
+planes = unique(handles.points.Z);
+numPlanes = numel(planes);
+
+
+FOVtargets = cell(numGroups,1);
+SLMtargets = cell(numGroups,1);
+GalvoPositions = zeros(numGroups, 2);
+
+FOVTargetImages = cell(numGroups,1);
+SLMTargetImages = cell(numGroups,1);
+GalvoPositionImages = cell(numGroups,1);
+FOVTargetImages_byPlane = cell(numGroups,numPlanes);
+
+
+for i = 1:ceil(numGroups)
+    groupIndices = find(handles.points.Group==i);
+    
+    % FOV targets
+    x = handles.points.X(groupIndices);
+    y = handles.points.Y(groupIndices);
+    z = handles.points.Zum(groupIndices);
+    z2 = handles.points.Z(groupIndices);
+    weights = handles.points.Weight(groupIndices);
+    FOVtargets{i} = [x;y;z;weights]';
+    xyIndices = sub2ind(size(blankImg), round(y), round(x));
+    FOVTargetImages{i} = blankImg;
+    FOVTargetImages{i}(xyIndices) = weights;
+    
+    for p = 1:numPlanes
+        thesePoints = z2==p;
+        FOVTargetImages_byPlane{i,p} = blankImg;
+        xyIndices = sub2ind(size(blankImg), round(y(thesePoints)), round(x(thesePoints)));
+        FOVTargetImages_byPlane{i,p}(xyIndices) = weights(thesePoints);
+    end
+    
+    % SLM targets
+    if handles.OffsetGalvos_Checkbox.Value
+        x = handles.points.OffsetX(groupIndices);
+        y = handles.points.OffsetY(groupIndices);
+    else
+        x = handles.points.X(groupIndices);
+        y = handles.points.Y(groupIndices);
+    end
+    z = handles.points.Zum(groupIndices);
+    weights = handles.points.Weight(groupIndices);
+    SLMtargets{i} = [x;y;z;weights]';
+    
+    xyIndices = sub2ind(size(blankImg), round(y), round(x));
+    SLMTargetImages{i} = blankImg;
+    SLMTargetImages{i}(xyIndices) = weights;
+    
+    % Galvo positions
+    if handles.OffsetGalvos_Checkbox.Value
+        x = handles.points.GroupCentroidX(groupIndices(1));
+        y = handles.points.GroupCentroidY(groupIndices(1));
+    else
+        x = round(handles.fovCntr(2));
+        y = round(handles.fovCntr(1));
+    end
+    GalvoPositions(i,:) = [x,y];
+    GalvoPositionImages{i} = blankImg;
+    GalvoPositionImages{i}(y,x) = 1;
+end
+
+handles.FOVtargets = FOVtargets;
+handles.FOVTargetImages = FOVTargetImages;
+handles.SLMtargets = SLMtargets;
+handles.SLMTargetImages = SLMTargetImages;
+handles.GalvoPositions = GalvoPositions;
+handles.GalvoPositionImages = GalvoPositionImages;
+handles.FOVTargetImages_byPlane = FOVTargetImages_byPlane;
+
+% Update handles structure
+guidata(handles.output, handles);
+
+if SaveResult
+    % save images out...
+end
 
 
 
@@ -2045,6 +2183,13 @@ for i = 1:NumTargetImages
 end
 imwrite(max( cat(3,handles.FOVTargetImages{:}) ,[],3), [handles.data.NaparmDirectory filesep 'Targets' filesep 'AllFOVTargets' '_' handles.data.ExperimentIdentifier '.tif']);
 
+planes = unique(handles.points.Z);
+numPlanes = numel(planes);
+for z = 1:numPlanes
+    imwrite(max( cat(3,handles.FOVTargetImages_byPlane{:,z}) ,[],3), [handles.data.NaparmDirectory filesep 'Targets' filesep 'AllFOVTargets_Plane' num2str(z) '_' handles.data.ExperimentIdentifier '.tif']);
+
+end
+
 NumTargetImages = numel(handles.SLMTargetImages);
 for i = 1:NumTargetImages
     ImageName = ['SLMTargets_' num2str(i,'%03d') '_' handles.data.ExperimentIdentifier];
@@ -2059,225 +2204,6 @@ for i = 1:NumTargetImages
     imwrite(ImageData, [handles.data.NaparmDirectory filesep 'Targets' filesep ImageName '.tif']);
 end
 imwrite(max( cat(3,handles.GalvoPositionImages{:}) ,[],3), [handles.data.NaparmDirectory filesep 'Targets' filesep 'AllGalvoPositions' '_' handles.data.ExperimentIdentifier '.tif']);
-
-
-
-function handles = MakeTargets(handles, SaveResult)
-blankImg = zeros(512,512);
-numGroups = numel(unique(handles.points.Group));
-
-FOVtargets = cell(numGroups,1);
-SLMtargets = cell(numGroups,1);
-GalvoPositions = zeros(numGroups, 2);
-
-FOVtargetImages = cell(numGroups,1);
-SLMtargetImages = cell(numGroups,1);
-GalvoPositionImages = cell(numGroups,1);
-
-for i = 1:ceil(numGroups)
-    groupIndices = find(handles.points.Group==i);
-    
-    % FOV targets
-    x = handles.points.X(groupIndices);
-    y = handles.points.Y(groupIndices);
-    z = handles.points.Zum(groupIndices);
-    weights = handles.points.Weight(groupIndices);
-    FOVtargets{i} = [x;y;z;weights]';
-    xyIndices = sub2ind(size(blankImg), y, x);
-    FOVTargetImages{i} = blankImg;
-    FOVTargetImages{i}(xyIndices) = weights;
-    
-    % SLM targets
-    if handles.OffsetGalvos_Checkbox.Value
-        x = handles.points.OffsetX(groupIndices);
-        y = handles.points.OffsetY(groupIndices);
-    else
-        x = handles.points.X(groupIndices);
-        y = handles.points.Y(groupIndices);
-    end
-    z = handles.points.Zum(groupIndices);
-    weights = handles.points.Weight(groupIndices);
-    SLMtargets{i} = [x;y;z;weights]';
-    
-    xyIndices = sub2ind(size(blankImg), y, x);
-    SLMTargetImages{i} = blankImg;
-    SLMTargetImages{i}(xyIndices) = weights;
-    
-    % Galvo positions
-    if handles.OffsetGalvos_Checkbox.Value
-        x = handles.points.GroupCentroidX(groupIndices(1));
-        y = handles.points.GroupCentroidY(groupIndices(1));
-    else
-        x = 256;
-        y = 256;
-    end
-    GalvoPositions(i,:) = [x,y];
-    GalvoPositionImages{i} = blankImg;
-    GalvoPositionImages{i}(y,x) = 1;
-end
-
-handles.FOVtargets = FOVtargets;
-handles.FOVTargetImages = FOVTargetImages;
-handles.SLMtargets = SLMtargets;
-handles.SLMTargetImages = SLMTargetImages;
-handles.GalvoPositions = GalvoPositions;
-handles.GalvoPositionImages = GalvoPositionImages;
-
-% Update handles structure
-guidata(handles.output, handles);
-
-if SaveResult
-    % save images out...
-end
-
-
-
-function handles = MakePhaseMasks(handles, SaveResult)
-NumGroups = numel(unique(handles.points.Group));
-Points = handles.SLMtargets;
-
-if handles.ComputePhaseMasks_Checkbox.Value
-    if SaveResult
-        % make save names
-        SaveNames = cell(NumGroups, 1);
-        for i = 1:ceil(NumGroups)
-            SaveNames{i} = [...
-                num2str(i,'%03d')...
-                '_' handles.data.ExperimentIdentifier ...
-                '_' num2str(size(Points{i},1),'%03d') 'Targets' ...
-                '_X' num2str(handles.GalvoPositions(i,1),'%03d') ...
-                '_Y' num2str(handles.GalvoPositions(i,2),'%03d') ...
-                '.tif'];
-        end
-        
-        % make (and save) phase masks
-        [PhaseMasks, TransformedSLMTargets] = SLMPhaseMaskMakerCUDA3D(...
-            'Points', Points,...
-            'Save', true,...
-            'SaveDirectory', handles.data.NaparmDirectory,...
-            'SaveName', SaveNames,...
-            'Do3DTransform', true);
-        
-    else  % don't save
-        % make (but don't save) phase masks
-        [PhaseMasks, TransformedSLMTargets] = SLMPhaseMaskMakerCUDA3D(...
-            'Points', Points,...
-            'Save', false,...
-            'Do3DTransform', true);
-    end
-    
-else  % don't make phase masks
-    PhaseMasks = repmat({zeros(512,512)},1,NumGroups);
-    TransformedSLMTargets = PhaseMasks;
-end
-
-handles.PhaseMasks = PhaseMasks;
-handles.TransformedSLMTargets = TransformedSLMTargets;
-
-% Update handles structure
-guidata(handles.output, handles);
-
-
-
-function MakeMarkPointsGPL(handles)
-GalvoPositions    = handles.GalvoPositions;
-X                 = GalvoPositions(:,1);
-Y                 = GalvoPositions(:,2);
-SpiralRevolutions = str2double(handles.SpiralRevolutions_Edit.String);
-SpiralDiameterUm  = str2double(handles.SpiralDiameter_Edit.String);
-IsSpiral          = 'True';
-SaveName          = [handles.data.NaparmDirectory filesep handles.data.ExperimentIdentifier];
-
-MarkPoints_GPLMaker(X, Y, IsSpiral, SpiralDiameterUm, SpiralRevolutions, SaveName);
-
-
-
-function MakeMarkPointsXML(handles)
-SaveName        = [handles.data.NaparmDirectory filesep handles.data.ExperimentIdentifier];
-NumGroups       = numel(unique(handles.points.Group));
-NumCellsPerGroup = histc(handles.points.Group, unique(handles.points.Group));
-SequenceRepetitions = str2double(handles.SequenceRepetitions_Edit.String);
-NumRows         = NumGroups * SequenceRepetitions;
-ShotsPerPattern = str2double(handles.ShotsPerPattern_Edit.String);
-InterPatternShotInterval = str2double(handles.InterPatternShotInterval_Edit.String);
-LaserPowerMW      = str2double(handles.LaserPowerMW_Edit.String);
-LaserPowerPV    = round(mw2pv(LaserPowerMW));
-TrigOnEach      = handles.TriggerEach_ToggleButton.Value;
-InitialDelay    = str2double(handles.InitialDelay_Edit.String);
-SpiralDuration  = str2double(handles.SpiralDuration_Edit.String);
-NumberOfTrials  = str2double(handles.NumberOfTrials_Edit.String);
-SpiralRevolutions = num2str(handles.SpiralRevolutions_Edit.String);
-AddDummy         = handles.AddDummy_Checkbox.Value;
-ChangePatternEvery = str2double(handles.ChangePatternEvery_Edit.String);
-IterationDelay = 0;
-InterPointDelay = max([0, InterPatternShotInterval-SpiralDuration]);
-
-% get parameters stored in settings file
-yaml = ReadYaml('settings.yml');
-VoltageOutputCategoryName = yaml.VoltageOutputCategoryName;
-VoltageOutputExperimentName = yaml.VoltageOutputExperimentName;
-LaserName = yaml.LaserName;
-TrigLine = yaml.TriggerLine;
-
-if ~TrigOnEach
-    TriggerFreq                 = [{'First Repetition'} ; repmat({'None'}, NumRows-1, 1)];
-    TriggerSelect               = [{TrigLine} ; repmat({'None'}, NumRows-1, 1)];
-    AsyncSyncFrequency          = [{'FirstRepetition'} ; repmat({'None'}, NumRows-1, 1)];
-    VoltageOutputCategoryName   = [{VoltageOutputCategoryName} ; repmat({'None'}, NumRows-1, 1)];
-    VoltageOutputExperimentName = [{VoltageOutputExperimentName} ; repmat({'None'}, NumRows-1, 1)];
-    InitialDelay                = [InitialDelay ; repmat((ChangePatternEvery-(ShotsPerPattern*(SpiralDuration+InterPointDelay))), NumRows-1, 1)];
-elseif TrigOnEach
-    TriggerFreq                 = repmat({'First Repetition'}, NumRows, 1);
-    TriggerSelect               = repmat({TrigLine}, NumRows, 1);
-    AsyncSyncFrequency          = repmat({'FirstRepetition'}, NumRows, 1);
-    VoltageOutputCategoryName   = repmat({VoltageOutputCategoryName}, NumRows, 1);
-    VoltageOutputExperimentName = repmat({VoltageOutputExperimentName}, NumRows, 1);
-end
-
-Indices = repmat(1:NumGroups,1,SequenceRepetitions)';
-PointNums = repmat(1:NumGroups,1,SequenceRepetitions)';
-Points = cell(NumRows,1);
-for p = 1:NumRows
-    Points{p} = ['Point ' num2str(PointNums(p))];
-end
-
-Powers = [];
-for p = 1:NumRows
-    Powers(p) = NumCellsPerGroup(Indices(p)) * str2double(handles.LaserPowerMW_Edit.String);
-    Powers(p) = round(mw2pv(Powers(p)));
-end
-
-Name = [...
-    num2str(NumGroups) 'Patterns_' ...
-    num2str(SequenceRepetitions) 'Repeats_x'...
-    num2str(ShotsPerPattern) 'ShotPerPattern'...
-    ];
-
-MarkPoints_XMLMaker(...
-    'SaveName', SaveName, ...
-    'ExptCat', 'NAPARM', ...
-    'ExptName', Name, ...
-    'NumRows', NumRows, ...
-    'AddDummy', AddDummy, ...
-    'UncagingLaser', LaserName,...
-    'UncagingLaserPower', Powers, ...
-    'InternalIterations',SequenceRepetitions, ...
-    'Repetitions', ShotsPerPattern, ...
-    'InitialDelay', InitialDelay, ...
-    'Duration', SpiralDuration, ...
-    'InterPointDelay', InterPointDelay, ...
-    'SpiralRevolutions', SpiralRevolutions, ...
-    'TriggerFrequency', TriggerFreq, ...
-    'TriggerSelection', TriggerSelect, ...
-    'AsyncSyncFrequency', AsyncSyncFrequency, ...
-    'VoltageOutputCategoryName', VoltageOutputCategoryName, ...
-    'VoltageOutputExperimentName', VoltageOutputExperimentName, ...
-    'Indices', Indices, ...
-    'Points', Points, ...
-    'Iterations', NumberOfTrials, ...
-    'IterationDelay',IterationDelay ...
-    );
-
 
 
 % --- Executes on button press in OffsetGalvos_Checkbox.
@@ -2467,13 +2393,13 @@ handles.AllTrialsTimingPlotAx.XLim = [0 max(xdata)];
 
 
 % update duration text strings
-SingleTrialDuration = numel(SpiralTriggers) / SampleRateHz;
-AllTrialsDuration = numel(AllTrialsSLMTriggers) / SampleRateHz;
+SingleTrialDuration = round(numel(SpiralTriggers) / SampleRateHz);
+AllTrialsDuration = round(numel(AllTrialsSLMTriggers) / SampleRateHz);
 if str2double(handles.TrialInterval_Edit.String) < SingleTrialDuration
-    handles.TrialInterval_Edit.String = num2str(SingleTrialDuration, '%.2g');
+    handles.TrialInterval_Edit.String = num2str(SingleTrialDuration, '%d');
 end
-handles.SingleTrialOutputDuration_Text.String = [num2str(SingleTrialDuration, '%.2g') ' (s)'];
-handles.OutputDuration_Text.String = [num2str(AllTrialsDuration, '%.2g') ' (s)'];
+handles.SingleTrialOutputDuration_Text.String = [num2str(SingleTrialDuration, '%d') ' (s)'];
+handles.OutputDuration_Text.String = [num2str(AllTrialsDuration, '%d') ' (s)'];
 
 
 % Save files out?
@@ -2675,7 +2601,23 @@ function NewPointColour_Edit_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of NewPointColour_Edit as text
 %        str2double(get(hObject,'String')) returns contents of NewPointColour_Edit as a double
 NewPointColour = lower(handles.NewPointColour_Edit.String);
-handles.points.h.MarkerEdgeColor = NewPointColour;
+NewPointColour = strrep(NewPointColour,'[','');
+NewPointColour = strrep(NewPointColour,']','');
+NewPointColour = strsplit(NewPointColour, ',');
+NewPointColour = str2double(NewPointColour);
+
+
+pointColours = repmat(NewPointColour, handles.points.Counter,1);
+showAllPoints = handles.ShowAllPoints_checkbox.Value;
+if ~showAllPoints
+    zIndices = handles.points.Z == handles.CurrentZPlane;
+else
+    zIndices = 1:handles.points.Counter;
+end
+pointColours(~zIndices,:) = nan;
+
+handles.points.h.CData = pointColours;
+
 
 
 
@@ -2827,7 +2769,7 @@ if any(handles.points.Selected)
     handles.points.Group(selectedIdx) = groupNum;
     
     % replot
-    handles = ComputeGroupCentroids(handles ,[]);
+%     handles = ComputeGroupCentroids(handles ,[]);
     handles = PlotClusterLines(handles, []);
     
     % deselect
@@ -3401,4 +3343,3 @@ handles.points.Zum = data(:,4)';
 
 % save
 guidata(handles.output, handles);
-
