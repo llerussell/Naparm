@@ -1,0 +1,1 @@
+nvcc -o GenerateHologramCUDA_16bit.dll --shared GenerateHologramCUDA_16bit.cu -lcufft
